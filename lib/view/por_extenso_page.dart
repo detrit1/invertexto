@@ -90,37 +90,56 @@ class _PorExtensoPageState extends State<PorExtensoPage> {
               onChanged: (value) {
                 setState(() {
                   moedaSelecionada = value;
-                  // força a atualização do FutureBuilder sem precisar digitar de novo
                   campo = campo;
                 });
               },
             ),
             Expanded(
-              child: FutureBuilder(
-                future: apiService.convertePorExtenso(campo, moedaSelecionada),
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                    case ConnectionState.none:
-                      return Container(
-                        width: 200,
-                        height: 200,
-                        alignment: Alignment.center,
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation(Colors.white),
-                          strokeWidth: 5.0,
-                        ),
-                      );
+              child: campo == null || campo!.isEmpty
+                  ? Center(
+                      child: Text(
+                        "Digite um número válido",
+                        style: TextStyle(color: Colors.redAccent, fontSize: 18),
+                      ),
+                    )
+                  : FutureBuilder(
+                      future: apiService.convertePorExtenso(
+                        campo,
+                        moedaSelecionada,
+                      ),
+                      builder: (context, snapshot) {
+                        switch (snapshot.connectionState) {
+                          case ConnectionState.waiting:
+                          case ConnectionState.none:
+                            return Container(
+                              width: 200,
+                              height: 200,
+                              alignment: Alignment.center,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation(
+                                  Colors.white,
+                                ),
+                                strokeWidth: 5.0,
+                              ),
+                            );
 
-                    default:
-                      if (snapshot.hasError) {
-                        return Container();
-                      } else {
-                        return exibeResultado(context, snapshot);
-                      }
-                  }
-                },
-              ),
+                          default:
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Text(
+                                  "Erro ao processar: ${snapshot.error}",
+                                  style: TextStyle(
+                                    color: Colors.redAccent,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return exibeResultado(context, snapshot);
+                            }
+                        }
+                      },
+                    ),
             ),
           ],
         ),
