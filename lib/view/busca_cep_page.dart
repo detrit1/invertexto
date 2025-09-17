@@ -24,13 +24,16 @@ class _BuscaCepPageState extends State<BuscaCepPage> {
               'assets/imgs/logo.png',
               fit: BoxFit.contain,
               height: 40,
-            )
+            ),
           ],
         ),
         centerTitle: true,
         leading: IconButton(
-          onPressed: () {Navigator.pop(context);},
-          icon: Icon(Icons.arrow_back, color: Colors.white,)),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+        ),
       ),
       backgroundColor: Colors.black,
       body: Padding(
@@ -52,31 +55,53 @@ class _BuscaCepPageState extends State<BuscaCepPage> {
               },
             ),
             Expanded(
-              child: FutureBuilder(
-                future: apiService.buscaCep(campo),
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                    case ConnectionState.none:
-                      return Container(
-                        width: 200,
-                        height: 200,
-                        alignment: Alignment.center,
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation(Colors.white),
-                          strokeWidth: 5.0,
-                        ),
-                      );
-
-                    default:
-                      if (snapshot.hasError) {
-                        return Container();
-                      } else {
-                        return exibeResultado(context, snapshot);
-                      }
-                  }
-                },
-              ),
+              child: campo == null || campo!.isEmpty
+                  ? Center(
+                      child: Text(
+                        "Digite um CEP válido",
+                        style: TextStyle(color: Colors.redAccent, fontSize: 18),
+                      ),
+                    )
+                  : FutureBuilder(
+                      future: apiService.buscaCep(campo),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                                ConnectionState.waiting ||
+                            snapshot.connectionState == ConnectionState.none) {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation(Colors.white),
+                              strokeWidth: 5.0,
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              "Erro ao buscar o CEP: ${snapshot.error}",
+                              style: TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 18,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return Center(
+                            child: Text(
+                              "CEP não encontrado",
+                              style: TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 18,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        } else {
+                          return exibeResultado(context, snapshot);
+                        }
+                      },
+                    ),
             ),
           ],
         ),
@@ -86,10 +111,11 @@ class _BuscaCepPageState extends State<BuscaCepPage> {
 
   Widget exibeResultado(BuildContext context, AsyncSnapshot snapshot) {
     String enderecoCompleto = '';
-    if(snapshot.data != null){
+    if (snapshot.data != null) {
       enderecoCompleto += snapshot.data["street"] ?? "Rua não disponível";
       enderecoCompleto += "\n";
-      enderecoCompleto += snapshot.data["neighborhood"] ?? "Bairro não encontrado";
+      enderecoCompleto +=
+          snapshot.data["neighborhood"] ?? "Bairro não encontrado";
       enderecoCompleto += "\n";
       enderecoCompleto += snapshot.data["city"] ?? "Cidade não encontrada";
       enderecoCompleto += "\n";
@@ -101,7 +127,7 @@ class _BuscaCepPageState extends State<BuscaCepPage> {
         enderecoCompleto,
         style: TextStyle(color: Colors.white, fontSize: 18),
         softWrap: true,
-      )
+      ),
     );
   }
 }
