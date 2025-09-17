@@ -93,7 +93,7 @@ class _ValidaDocumentoPageState extends State<ValidaDocumentoPage> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
+                foregroundColor: Colors.white,
               ),
               onPressed: () async {
                 final doc = _controllerDocumento.text;
